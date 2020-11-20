@@ -1,49 +1,51 @@
 class PrototypesController < ApplicationController
-before_action :authenticate_user!, except: [:index, :show]
 
-  def index
-    @prototypes = Prototype.all
-  end
+    def index
+      @prototypes = Prototype.all
+    end
 
-  def new
-    @prototype = Prototype.new
-  end
+    def new
+      @prototype = Prototype.new
+    end
 
-  def create
-
-    if Prototype.create(prototype_params)
+   def create
+   @prototype = Prototype.create(prototype_params)
+    
+   if @prototype.save
       redirect_to root_path
     else
-       render :new
+      render :new
     end
    
-  end
+   end
 
-  def show
+   def show
     @prototype = Prototype.find(params[:id])
     @comment = Comment.new
     @comments = @prototype.comments.includes(:user)
-  end
+   end
 
-  def edit
-    unless user_signed_in?
+   def edit
+    @prototype = Prototype.find(params[:id])
+    unless @prototype.user_id == current_user.id
       redirect_to action: :index
     end
-    @prototype = Prototype.find(params[:id])
-  end
+    
+   end
+  
 
-  def update
-    prototype = Prototype.find(params[:id])
-    prototype.update(prototype_params)
+   def update
+    @prototype = Prototype.find(params[:id])
+    @prototype.update(prototype_params)
    
-    if prototype.update(prototype_params)
+    if @prototype.save
       redirect_to prototype_path
     else
        render :edit
     end
-  end
+   end
 
-  def destroy
+   def destroy
     prototype = Prototype.find(params[:id])
     prototype.destroy
    
@@ -52,13 +54,18 @@ before_action :authenticate_user!, except: [:index, :show]
     else
        render :edit
     end
-  end
+   end
 
  private
 
-  def prototype_params
-  params.require(:prototype).permit(:title, :catch_copy, :concept, :image).merge(user_id: current_user.id)
-  end
+   def prototype_params
+    params.require(:prototype).permit(:title, :catch_copy, :concept, :image).merge(user_id: current_user.id)
+   end
+  
 
+    
+   
+  
+   
 
-end
+ end
